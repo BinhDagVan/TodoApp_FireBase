@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "115627582619",
+    "project_id": "demoreactnative-86df1",
+    "storage_bucket": "demoreactnative-86df1.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:115627582619:android:0badfd52dced094160923e",
+        "android_client_info": {
+          "package_name": "com.anonymous.DemoReactNativeFireBase"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCzobxpXMOfySFNJBOZkOUSHx4dBCHTYug"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
