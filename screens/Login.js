@@ -19,8 +19,8 @@ const Login = ({navigation}) => {
 
    return (
     <View style={styles.container}>
-      <Image source={require('../assets/banner_nro.png')} style={styles.banner} />
-      <Text style={styles.title}>Đăng nhập vào tài khoản NRO</Text>
+      <Image source={require('../assets/1691964348159.png')} style={styles.banner} />
+      <Text style={styles.title}>Sign in</Text>
       <TextInput
         style={styles.textInput}
         label="Email"
@@ -41,17 +41,18 @@ const Login = ({navigation}) => {
       {/* <HelperText type="error" visible={hasErrorPassword()}>
         Password ít nhất 6 ký tự
       </HelperText> */}
-      <Text style={styles.createAccountText} onPress={() => {navigation.navigate('Register')}}>Tạo tài khoản ?</Text>
+     
       <Button style={styles.button} mode="contained" onPress={handleLogin} disabled={hasErrorEmail() || hasErrorPassword()}>
         Đăng nhập
       </Button>
+      <Text style={styles.createAccountText} onPress={() => {navigation.navigate('Register')}}>Sign Up ?</Text>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#FF9900',
+    backgroundColor: '#2d8cec',
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
@@ -61,8 +62,8 @@ const styles = StyleSheet.create({
     height: 150,
   },
   title: {
-    fontSize: 30,
-    fontWeight: '500',
+    fontSize: 45,
+    fontWeight: '700',
     textAlign: 'center',
     color: 'red',
     marginBottom: 10,
@@ -73,16 +74,14 @@ const styles = StyleSheet.create({
     marginTop:20,
   },
   button: {
-    backgroundColor: '#33CCFF',
+    backgroundColor: '#FF9900',
     color: 'black',
     marginTop: 10,
     
   },
   createAccountText: {
-    position: 'absolute',
-    right: 20,
+    marginTop:10,
     color: 'blue',
-    paddingBottom: 10,
     fontSize:15,
   },
 });
