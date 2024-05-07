@@ -26,7 +26,7 @@ const Register = () => {
 
   return (
     <View style={{backgroundColor:'#FF9900', flex: 1, justifyContent: 'center', alignItems:'center' }}>
-      <Image source={require('./assets/banner_nro.png')} style={{resizeMode: 'contain', height:150,}}>
+      <Image source={require('../assets/banner_nro.png')} style={{resizeMode: 'contain', height:150,}}>
       </Image>
       <Text style={{fontSize:30 , fontWeight:500, textAlign: 'center', color: 'red', marginBottom:10}}>Create Account NRO</Text>
       <TextInput style={[styles.textStyle]} label="Email" value={email} onChangeText={setEmail} />
