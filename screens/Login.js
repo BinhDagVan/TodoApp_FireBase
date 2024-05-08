@@ -27,9 +27,9 @@ const Login = ({navigation}) => {
         value={email}
         onChangeText={setEmail}
       />
-      {/* <HelperText type="error" visible={hasErrorEmail()}>
+      <HelperText type="error" visible={hasErrorEmail()}>
         Địa chỉ Email không hợp lệ
-      </HelperText> */}
+      </HelperText>
       <TextInput
         style={styles.textInput}
         label="Password"
@@ -38,9 +38,9 @@ const Login = ({navigation}) => {
         onChangeText={setPassword}
         right={<TextInput.Icon name="eye" onPress={() => setShowPassword(!showPassword)} />}
       />
-      {/* <HelperText type="error" visible={hasErrorPassword()}>
+      <HelperText type="error" visible={hasErrorPassword()}>
         Password ít nhất 6 ký tự
-      </HelperText> */}
+      </HelperText>
      
       <Button style={styles.button} mode="contained" onPress={handleLogin} disabled={hasErrorEmail() || hasErrorPassword()}>
         Đăng nhập

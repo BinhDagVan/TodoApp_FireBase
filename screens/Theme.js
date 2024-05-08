@@ -4,27 +4,52 @@ import React, { useState, useEffect } from 'react'
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 
-const DemoTheme = () => {
+
+const DemoTheme = ({navigation}) => {
   const [newTodo, setNewTodo] = useState('');
   const [Jobs, setJobs] = useState([]);
+  const [userName, setUserName] = useState('');
 
   useEffect(() => {
+
+
     // Load danh sách Jobs từ Firestore khi component được render
     const unsubscribe = auth().onAuthStateChanged((user) => {
       if (user) {
         const userId = user.uid;
         firestore()
+          .collection('users')
+          .doc(userId)
+          .get()
+          .then(doc => {
+            if (doc.exists) {
+              const userData = doc.data();
+              setUserName(userData.fullname);
+            } else {
+              console.log('No such document!');
+            }
+          })
+          .catch(error => {
+            console.log('Error getting document:', error);
+          });
+
+          const jobListener = firestore()
           .collection('Jobs')
-          .where('userId', '==', userId) // Lọc Jobs của người dùng hiện tại
-          .onSnapshot((snapshot) => {
-            const newJobs = snapshot.docs.map((doc) => ({
+          .where('userId', '==', userId)
+          .onSnapshot(snapshot => {
+            const newJobs = snapshot.docs.map(doc => ({
               id: doc.id,
               ...doc.data(),
             }));
             setJobs(newJobs);
           });
+
+        return () => {
+          jobListener();
+        };
       } else {
         setJobs([]);
+        setUserName('');
       }
     });
 
@@ -60,11 +85,24 @@ const DemoTheme = () => {
     }
   };
 
+  const handleLogout = () => {
+    auth()
+      .signOut()
+      .then(() => {
+        navigation.navigate('Login');
+      })
+      .catch(error => {
+        console.error('Error logging out: ', error);
+      });
+  };
+
   return (
     <View style={{ flex: 1 }}>
       <Appbar>
-        <Appbar.Content  title={'Home'}></Appbar.Content>
+        <Appbar.Content  title={userName ? userName : 'Theme'}></Appbar.Content>
+        <Appbar.Action icon="logout" onPress={handleLogout} />
       </Appbar>
+      
       <View style={{ flexDirection: 'row' }}>
             <TextInput   
             style ={{width:'80%', marginLeft:5}}   
@@ -83,7 +121,6 @@ const DemoTheme = () => {
         renderItem={({ item }) => (
           <View>
             <Text style={{fontSize:25, marginLeft:10}}>{item.text}</Text>
-         
           </View>
         )}
       />
