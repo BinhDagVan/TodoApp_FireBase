@@ -1,89 +1,84 @@
-import React, { useState } from 'react';
-import { Image, Text, Alert, View, StyleSheet } from 'react-native';
-import { Button, HelperText, TextInput } from 'react-native-paper';
-import auth from '@react-native-firebase/auth';
+import { useState, useEffect } from 'react';
+import { View } from 'react-native';
+import { Button, HelperText, Text, TextInput } from 'react-native-paper';
+import { login, useMyContextController } from '../store';
+import { COLORS } from '../constants';
+import { Colors } from 'react-native-paper';
+import AddNewService from './AddnewServices';
 
-const Login = ({navigation}) => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
+const Login = ({ navigation }) => {
+    const [controller, dispatch] = useMyContextController();
+    const { userLogin } = controller;
+    const [email, setEmail] = useState('1@gmail.com');
+    const [password, setPassword] = useState('111111');
+    const [showpassword, setShowPassword] = useState(false);
 
-  const handleLogin = () => {
-    auth()
-      .signInWithEmailAndPassword(email, password)
-      .then(() => navigation.navigate('Theme'))
-      .catch(error => Alert.alert('Đăng nhập thất bại', error.message));
-  };
-  const hasErrorEmail = () => !email.includes('@gmail.com');
-  const hasErrorPassword = () => password.length < 6;
+    const hasErrorEmail = () => !email.includes('@');
+    const hasErrorPassword = () => password.length < 6;
 
-   return (
-    <View style={styles.container}>
-      <Image source={require('../assets/1691964348159.png')} style={styles.banner} />
-      <Text style={styles.title}>Sign in</Text>
-      <TextInput
-        style={styles.textInput}
-        label="Email"
-        value={email}
-        onChangeText={setEmail}
-      />
-      <HelperText type="error" visible={hasErrorEmail()}>
-        Địa chỉ Email không hợp lệ
-      </HelperText>
-      <TextInput
-        style={styles.textInput}
-        label="Password"
-        secureTextEntry={!showPassword}
-        value={password}
-        onChangeText={setPassword}
-        right={<TextInput.Icon name="eye" onPress={() => setShowPassword(!showPassword)} />}
-      />
-      <HelperText type="error" visible={hasErrorPassword()}>
-        Password ít nhất 6 ký tự
-      </HelperText>
-     
-      <Button style={styles.button} mode="contained" onPress={handleLogin} disabled={hasErrorEmail() || hasErrorPassword()}>
-        Đăng nhập
-      </Button>
-      <Text style={styles.createAccountText} onPress={() => {navigation.navigate('Register')}}>Sign Up ?</Text>
-    </View>
-  );
+    const handleLogin = () => {
+        login(dispatch, email, password);
+    };
+
+    useEffect(() => {
+        console.log(userLogin);
+        if (userLogin != null) {
+            if (userLogin.role === 'admin') {
+                navigation.navigate('Admin');
+            } else if (userLogin.role === 'customer') {
+                navigation.navigate('Customer');
+            }
+        }
+    }, [userLogin]);
+
+    const onSubmit = () => {
+        login(dispatch, email, password);
+    };
+
+    return (
+        <View style={{ flex: 1, padding: 10 }}>
+            <Text
+                style={{
+                    fontSize: 40,
+                    fontWeight: 'bold',
+                    alignSelf: 'center',
+                    color: 'pink',
+                    marginTop: 50,
+                    marginBottom: 10,
+                }}
+            >
+                Login
+            </Text>
+
+            <TextInput label="Email" value={email} onChangeText={setEmail} />
+            <HelperText type="error" visible={hasErrorEmail}>
+                Sai địa chỉ email
+            </HelperText>
+
+            <TextInput
+                label="Password"
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry={!showpassword}
+            />
+            <HelperText type="error" visible={hasErrorPassword}>
+                Password ít nhất 6 kí tự
+            </HelperText>
+
+            <Button style={{backgroundColor:'#FF3366'}} mode="contained"  onPress={handleLogin}>
+                Login
+            </Button>
+
+            <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
+                <Text>Don't have an account?</Text>
+                <Button onPress={() => navigation.navigate('Register')}>Create new account</Button>
+            </View>
+
+            <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
+                <Button onPress={() => navigation.navigate('AddNewService')}>Forgot Password</Button>
+            </View>
+        </View>
+    );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    backgroundColor: '#2d8cec',
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  banner: {
-    resizeMode: 'contain',
-    height: 150,
-  },
-  title: {
-    fontSize: 45,
-    fontWeight: '700',
-    textAlign: 'center',
-    color: 'red',
-    marginBottom: 10,
-  },
-  textInput: {
-    width: '90%',
-    borderTopEndRadius: 20,
-    marginTop:20,
-  },
-  button: {
-    backgroundColor: '#FF9900',
-    color: 'black',
-    marginTop: 10,
-    
-  },
-  createAccountText: {
-    marginTop:10,
-    color: 'blue',
-    fontSize:15,
-  },
-});
 
 export default Login;

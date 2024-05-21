@@ -1,104 +1,111 @@
-import { useState } from 'react';
-import { Image, Text, Alert, View ,StyleSheet} from 'react-native';
-import { Button , HelperText, Icon, TextInput} from "react-native-paper";
-import auth from '@react-native-firebase/auth';
-import firestore from '@react-native-firebase/firestore'
+import { Alert, View } from "react-native";
+import { Button, HelperText, Text, TextInput } from "react-native-paper";
+import { useState } from "react";
+import firestore from "@react-native-firebase/firestore";
+import auth from "@react-native-firebase/auth";
+import COLORS from "../constants"
 
-const Register = ({navigation}) => {
-  const [fullname, setName] = useState("");
+const Register = ({ navigation }) => {
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [passwordConfirm, setPasswordConfirm] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showPasswordConfirm, setShowPasswordConfirm] = useState(false);
+  const [address, setAddress] = useState("");
+  const [phone, setPhone] = useState("");
+
+  const hasErrorName = () => name === "";
+  const hasErrorEmail = () => !email.includes("@");
+  const hasErrorPassword = () => password.length < 6;
+  const hasErrorPasswordConfirm = () => passwordConfirm != password;
+
+  const USERS = firestore().collection("USERS");
 
   const handleCreateAccount = () => {
     auth()
       .createUserWithEmailAndPassword(email, password)
-      .then((userCredential) => {
-        const user = userCredential.user;
-        // Lưu fullname vào cơ sở dữ liệu Firestore
-        firestore()
-          .collection('users')
-          .doc(user.uid)
+      .then((response) => {
+        USERS.doc(email)
           .set({
-            fullname: fullname,
-            email: email,
-            // Các thông tin khác nếu cần
+            name,
+            email,
+            password,
+            address,
+            phone,
+            role:"customer"
           })
-          .then(() => {
-            Alert.alert('Đăng ký thành công với tài khoản: ' + fullname);
-            navigation.navigate('Login');
-          })
-          .catch((error) => {
-            Alert.alert('Có lỗi xảy ra khi lưu thông tin người dùng: ', error.message);
-          });
+          navigation.navigate("Login");
       })
-      .catch((error) => {
-        Alert.alert('Tài khoản đã tồn tại hoặc sai thông tin đăng ký: ', error.message);
-      });
+      .catch((e) => Alert.alert("Tài khoản tồn tại"));
   };
-  const hasErrorPassword = () => password.length < 6 ;
-  const hasErrorPasswordConfirm = () => passwordConfirm != password;
-  const hasErrorEmail = () => !email.includes("@gmail.com");
-  const hasErrorName = () => fullname.length < 1 ;
 
   return (
-    <View style={{backgroundColor:'#2d8cec', flex: 1, justifyContent: 'center', alignItems:'center' }}>
-      <Image source={require('../assets/1691964348159.png')} style={{resizeMode: 'contain', height:150,}}>
-      </Image>
-      <Text style={{fontSize:30 , fontWeight:500, textAlign: 'center', color: 'red', marginBottom:10}}>Create a new AWS account</Text>
-      <TextInput style={[styles.textStyle]} label="Full Name" value={fullname} onChangeText={setName} />
-      <HelperText type="error" visible={hasErrorName()}>
-        Không được để trống
-      </HelperText>
-      <TextInput style={[styles.textStyle]} label="Email" value={email} onChangeText={setEmail} />
-      <HelperText type="error" visible={hasErrorEmail()}>
-        Địa chỉ Email không hợp lệ
-      </HelperText>
-      <TextInput
-        style={[styles.textStyle]} 
-        label="Password"
-        secureTextEntry={!showPassword}
-        value={password}
-        onChangeText={setPassword}
-        right={<TextInput.Icon icon="eye" onPress={() => setShowPassword(!showPassword)} />}
-      />
-      <HelperText type ="error"  visible={hasErrorPassword()}>
-        Password it nhat 6 ki tu 
-        </HelperText>
-      <TextInput
-        style={[styles.textStyle]} 
-        label="Password Confirm"
-        secureTextEntry={!showPasswordConfirm}
-        value={passwordConfirm}
-        onChangeText={setPasswordConfirm}
-        right={<TextInput.Icon icon="eye" onPress={() => setShowPasswordConfirm(!showPasswordConfirm)} />}
-      />
-      <HelperText type ="error"  visible={hasErrorPasswordConfirm()}>
-        Password Confirm khong khop
-        </HelperText>
-      <Button style={{backgroundColor:'#FF9900',marginTop:10,}}  mode="contained" onPress={handleCreateAccount} disabled = {hasErrorEmail() || hasErrorPassword() || hasErrorPasswordConfirm()}>
-        Đăng ký</Button>
-        <Text style={styles.createAccountText} onPress={() => {navigation.navigate('Login')}}>Login In ?</Text>
-    </View>
+        <View style={{flex: 1, padding: 10}}>
+            <Text style={{
+                fontSize: 40,
+                fontWeight: "bold",
+                alignSelf: "center",
+                color: COLORS.pink,
+                marginTop: 20,
+                marginBottom: 20
+            }}> Create New Account </Text>
+            <TextInput
+                label="Full Name"
+                value={name}
+                onChangeText={setName}
+            />
+            <HelperText type="error" visible={hasErrorName()}>
+                Full name không được phép để trống
+            </HelperText>
+            <TextInput
+                label="Email"
+                value={email}
+                onChangeText={setEmail}
+            />
+            <HelperText type="error" visible={hasErrorEmail()}>
+                Địa chỉ email không hợp lệ
+            </HelperText>
+            <TextInput
+                label="Password"
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry = {!showPassword}
+                right = {<TextInput.Icon icon="eye" onPress={() => setShowPassword(!showPassword)}/>}
+            />
+            <HelperText type="error" visible={hasErrorPassword()}>
+                Password ít nhất 6 kí tự
+            </HelperText>
+            <TextInput 
+                label={"Confirm Password"}
+                value={passwordConfirm}
+                onChangeText={setPasswordConfirm}
+                secureTextEntry={!showPasswordConfirm}
+                right={<TextInput.Icon icon="eye" onPress={() => setShowPasswordConfirm(!showPasswordConfirm)} />}
+            />
+
+            <HelperText type="error" visible={hasErrorPasswordConfirm()}>
+                PasswordConfirm phải so khớp với password
+            </HelperText>
+            <TextInput
+                label={"Address"}
+                value={address}
+                onChangeText={setAddress}
+                style={{ marginBottom: 10 }}
+            />
+            <TextInput
+                label={"Phone"}
+                value={phone}
+                onChangeText={setPhone}
+                style={{ marginBottom: 10 }}
+            />
+            <View style={{ flexDirection: "row", justifyContent: "center", alignItems: "center" }}>
+                <Button mode="contained" onPress={handleCreateAccount}>
+                    Create New Account
+                </Button>
+            </View>
+        </View>    
   );
 };
 
-const styles = StyleSheet.create({
-  textStyle: {
-    width:'90%',
-    borderTopEndRadius:20,
-    marginTop:20,
-  },
-  createAccountText: {
-    marginTop:10,
-    color: 'blue',
-    fontSize:15,
-  },
-});
-
-
 export default Register;
-
-
