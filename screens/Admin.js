@@ -1,97 +1,115 @@
-import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { List, Menu } from 'react-native-paper';
-import COLORS from '../constants';
+import React, { useState, useEffect } from 'react';
+import { SafeAreaView, View, FlatList, Image, StyleSheet, Text, TouchableOpacity } from 'react-native';
+import { Appbar, IconButton } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
+import firestore from '@react-native-firebase/firestore';
+import { useMyContextController } from '../context/'; 
+import COLORS from '../constants';
+import Service from '../context/Service';
 
-const Service = ({ id, title, price, imageUrl }) => {
-  const [visible, setVisible] = useState(false);
+const Admin = () => {
+  const [loading, setLoading] = useState(true);
+  const [services, setServices] = useState([]);
+  const [controller] = useMyContextController();
+  const { userLogin } = controller;
+  const ref = firestore().collection('services');
   const navigation = useNavigation();
-  const openMenu = () => setVisible(true);
-  const closeMenu = () => setVisible(false);
 
-  const truncateTitle = (title) => {
-    const maxLength = 90;
-    return title.length > maxLength ? `${title.substring(0, maxLength)}...` : title;
-  };
+  useEffect(() => {
+    const unsubscribe = ref.onSnapshot(querySnapshot => {
+      const list = [];
+      querySnapshot.forEach(doc => {
+        const { title, price, imagePaths, date } = doc.data(); 
+        const formattedDate = date ? date.toDate().toISOString() : null; 
+        list.push({
+          id: doc.id,
+          title,
+          price,
+          imagePaths,
+          date: formattedDate,
+        });
+      });
+      setServices(list);
+  
+      if (loading) {
+        setLoading(false);
+      }
+    });
+  
+    return () => unsubscribe();
+  }, []);
 
-  const formatPrice = (price) => {
-    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
-  };
+
+  if (loading) {
+    return null;
+  }
 
   return (
-    <TouchableOpacity onPress={openMenu}>
-      <View style={styles.container}>
-        <View style={styles.left}>
-          <List.Item
-            title={truncateTitle(title)}
-            titleStyle={styles.title}
-          />
-        </View>
-        {price !== undefined && price !== null && (
-          <View style={styles.right}>
-            <Text style={styles.price}>{formatPrice(price)}</Text>
-          </View>
-        )}
-        <Menu
-          visible={visible}
-          onDismiss={closeMenu}
-          anchor={<Text style={styles.menuAnchor}>...</Text>}
-        >
-          <Menu.Item
-            onPress={() => { navigation.navigate('UpdateService', {id, title, price, imageUrl});
-              closeMenu();
-            }}
-            title="Update Service"
-          />
-          <Menu.Item
-            onPress={() => {
-              navigation.navigate('ServiceDetail', {id, title, price, imageUrl});
-              closeMenu();
-            }}
-            title="Detail Service"
-          />
-        </Menu>
+    <SafeAreaView style={{ flex: 1 }}>
+      <Appbar.Header style={{ backgroundColor: COLORS.pink }} > 
+        <Appbar.Content 
+          title={`${userLogin ? userLogin.name : 'Guest'}`} 
+          titleStyle={{ fontWeight: 'bold' }}
+          color='white' 
+        />
+      </Appbar.Header>
+
+      <View style={styles.imageContainer}>
+        <Image
+          source={require('../assets/lg.png')}
+          style={styles.logo}
+        />
       </View>
-    </TouchableOpacity>
+
+      <View style={styles.inputContainer}>
+        <Text style={{fontWeight:"bold", color:COLORS.black, fontSize:20}}>Danh sách dịch vụ</Text>
+        {userLogin.role === 'admin' && (
+          <IconButton
+            icon="plus-circle"
+            size={30}
+            onPress={() => navigation.navigate('AddService')} 
+            style={[styles.addButton, { marginLeft: 'auto', color: COLORS.pink }]}
+          />
+        )}
+      </View>
+
+      <FlatList
+        style={{ flex: 1 }}
+        data={services}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => {
+          return (
+            <TouchableOpacity onPress={() => navigation.navigate('DetailsService', { documentId: item.id, title: item.title, price: item.price, imagePaths: item.imagePaths, date: item.date })}>
+              <Service {...item} />
+            </TouchableOpacity>
+          );
+        }}
+      />
+    </SafeAreaView>
   );
-};
+}
+
+export default Admin;
 
 const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+  imageContainer: {
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-    borderWidth: 1,
-    borderColor: 'grey',
-    borderRadius: 15,
-    marginHorizontal: 16,
-    marginBottom: 8,
+    marginTop: 10,
   },
-  left: {
-    flex: 1,
+  logo: {
+    width: 200,
+    height: 100,
+    resizeMode: 'contain',
   },
-  right: {
-    marginLeft: 16,
+  inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    marginBottom: 10,
   },
-  title: {
-    fontSize: 14,
-    fontWeight: 'bold',
-  },
-  price: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: 'red',
-  },
-  menuAnchor: {
-    fontSize: 16,
-    color: COLORS.grey,
-    paddingRight: 10,
+  addButton: {
+    alignSelf: 'center', 
+    marginBottom: 10,
+    marginStart:190
   },
 });
-
-export default Service;

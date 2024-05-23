@@ -1,9 +1,9 @@
-import { Colors } from 'react-native-paper';
-
 export default {
-    blue: Colors.blue500,
-    grey: Colors.grey500,
-    black: Colors.black,
-    pink: Colors.pink500,
-    white: Colors.white,
+    blue: '#3498DB',
+    greyLight: '#f7f7f7',
+    grey: '#D8D8D8',
+    greyDark: '#BBBBBB',
+    black: '#000000',
+    pink: '#FF3366',
+    white: '#fff'
 };

@@ -1,58 +1,49 @@
-import 'react-native-gesture-handler';
 import React from 'react';
-import { useMyContextController } from '../store';
+import { useMyContextController } from "../context/";
 import { createStackNavigator } from '@react-navigation/stack';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs';
 import Login from './Login';
 import Customer from './Customer';
 import Admin from './Admin';
 import COLORS from '../constants';
-import Icon from 'react-native-vector-icons/FontAwesome5'
+import AntDesign from 'react-native-vector-icons/AntDesign';
+import AddService from './AddService';
+import DetailsService from './DetailsService';
+import UpdateService from './UpdateService';
+import Settings from './Setting';
 import Register from './Register';
-import Setting from './Setting';
-import AddNewService from './AddnewServices';
-import UpdateService from './UpdateServices';
-import DetailService from './Details';
+import Transaction from './Transaction';
 
 const Stack = createStackNavigator();
-const Tab = createBottomTabNavigator();
+const Tab = createMaterialBottomTabNavigator();
 
+const getTabBarIcon = (icon) => ({ color, focused }) => (
+    <AntDesign name={icon} size={26} color={focused ? COLORS.pink : color} />
+);
 
 const AdminScreens = () => {
-    return (
-        <Stack.Navigator
-           
-            screenOptions={{
-                headerTintColor: 'white',
-                headerStyle: { backgroundColor: COLORS.blue },
-                headerTitleAlign: 'center',
-                
-            }}
-        >
-            <Stack.Screen name="Home" component={Admin} options={{ headerShown: false }} />
-            <Stack.Screen name="UpdateService" component={UpdateService}  />
-            <Stack.Screen name="ServiceDetail" component={DetailService} />
-            <Stack.Screen name="AddNewService" component={AddNewService} />
-        </Stack.Navigator>
-    );
-}
+    const [controller] = useMyContextController();
+    const { userLogin } = controller;
 
-const CustomerScreens = () => {
     return (
         <Stack.Navigator
-            
+            initialRouteName="Home"
             screenOptions={{
                 headerTintColor: 'white',
-                headerStyle: { backgroundColor: COLORS.blue },
+                headerStyle: { backgroundColor: COLORS.pink },
                 headerTitleAlign: 'center',
             }}
         >
-            <Stack.Screen name="CustomerScreen" component={Customer} options={{ headerShown: false }} />
+            <Stack.Screen name="Homes" component={Admin} options={{ headerShown: false }} />
+            {userLogin.role === 'admin' && (
+                <Stack.Screen name="AddService" component={AddService} options={{ headerShown: false }} />
+            )}
+            <Stack.Screen name="DetailsService" component={DetailsService} options={{ headerShown: false }}/>
+            <Stack.Screen name="UpdateService" component={UpdateService} />
+            <Stack.Screen name="Login" component={Login} options={{ headerShown: true }}/>
         </Stack.Navigator>
     );
-}
-
+};
 
 const SettingScreens = () => {
     return (
@@ -61,13 +52,41 @@ const SettingScreens = () => {
             screenOptions={{
                 headerTintColor: 'white',
                 headerStyle: { backgroundColor: COLORS.pink },
-                
+                headerTitleAlign: 'center',
             }}
         >
-            <Stack.Screen name="SettingScreen" component={Setting} options={{ headerShown: false }} />
+            <Stack.Screen name="Settingss" component={Settings} />
         </Stack.Navigator>
     );
-}
+};
+const TransactionScreens = () => {
+    return (
+        <Stack.Navigator
+          
+            screenOptions={{
+                headerTintColor: 'white',
+                headerStyle: { backgroundColor: COLORS.pink },
+                headerTitleAlign: 'center',
+            }}
+        >
+            <Stack.Screen name="Transactions" component={Transaction} />
+        </Stack.Navigator>
+    );
+};
+const CustomerScreens = () => {
+    return (
+        <Stack.Navigator
+            
+            screenOptions={{
+                headerTintColor: 'white',
+                headerStyle: { backgroundColor: COLORS.pink },
+                headerTitleAlign: 'center',
+            }}
+        >
+            <Stack.Screen name="Customers" component={Customer} />
+        </Stack.Navigator>
+    );
+};
 
 const Router = () => {
     const [controller] = useMyContextController();
@@ -87,43 +106,31 @@ const Router = () => {
                     {userLogin.role === 'admin' ? (
                         <>
                             <Tab.Screen
-                                name="Admin"
+                                name="Home"
                                 component={AdminScreens}
                                 options={{
-                                    tabBarIcon: ({ color, size }) => (
-                                        <Icon name="home" color={color} size={size} />
-                                    ),
-                                    title: "Home"
+                                    tabBarIcon: getTabBarIcon('home'), 
                                 }}
                             />
-                            <Tab.Screen
+                             <Tab.Screen
                                 name="Transaction"
-                                component={AddNewService}
+                                component={TransactionScreens}
                                 options={{
-                                    tabBarIcon: ({ color, size }) => (
-                                        <Icon name="money-bill" color={color} size={size} />
-                                    ),
-                                    title: 'Transaction'
+                                    tabBarIcon: getTabBarIcon('shoppingcart'), 
                                 }}
                             />
                             <Tab.Screen
                                 name="Customer"
                                 component={CustomerScreens}
                                 options={{
-                                    tabBarIcon: ({ color, size }) => (
-                                        <Icon name="users" color={color} size={size} />
-                                    ),
-                                    title: 'Customer'
+                                    tabBarIcon: getTabBarIcon('user'), 
                                 }}
                             />
                             <Tab.Screen
                                 name="Setting"
                                 component={SettingScreens}
                                 options={{
-                                    tabBarIcon: ({ color, size }) => (
-                                        <Icon name="cog" color={color} size={size} />
-                                    ),
-                                    title: 'Setting'
+                                    tabBarIcon: getTabBarIcon('setting'), 
                                 }}
                             />
                         </>
@@ -133,20 +140,15 @@ const Router = () => {
                                 name="Home"
                                 component={AdminScreens}
                                 options={{
-                                    tabBarIcon: ({ color, size }) => (
-                                        <Icon name="home" color={color} size={size} />
-                                    ),
-                                    title: "Home"
+                                    tabBarIcon: getTabBarIcon('home'), 
                                 }}
                             />
+                            
                             <Tab.Screen
                                 name="Setting"
                                 component={SettingScreens}
                                 options={{
-                                    tabBarIcon: ({ color, size }) => (
-                                        <Icon name="cog" color={color} size={size} />
-                                    ),
-                                    title: 'Setting'
+                                    tabBarIcon: getTabBarIcon('setting'), 
                                 }}
                             />
                         </>
@@ -167,4 +169,5 @@ const Router = () => {
         </>
     );
 }
+
 export default Router;
